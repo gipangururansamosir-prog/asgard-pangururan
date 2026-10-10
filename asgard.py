@@ -114,64 +114,78 @@ def render_lapor_gangguan():
     if st.button("← Kembali ke Dashboard"):
         navigate_to("dashboard")
     
-    st.title("⚡ Form Pelaporan Gangguan GI PANGURURAN 150 kV")
-    st.write("Silakan isi data laporan gangguan operasional dengan lengkap.")
+    st.title("⚡ Form Pelaporan Gangguan Penghantar GI PANGURURAN 150 kV")
+    st.write("Silakan masukkan data log gangguan, investigasi relay, dan status pemulihan sistem di bawah ini.")
     
-    with st.form("form_laporan_lengkap"):
-        st.subheader("1. Waktu & Petugas")
-        col_a, col_b = st.columns(2)
-        with col_a:
-            tgl = st.date_input("Tanggal Gangguan")
-        with col_b:
-            jam = st.time_input("Jam / Waktu Kejadian")
+    with st.form("form_laporan_lengkap_gi"):
+        st.subheader("1. Waktu & Petugas Piket")
+        c1, c2 = st.columns(2)
+        with c1:
+            tanggal = st.date_input("Tanggal Kejadian Gangguan")
+        with c2:
+            jam = st.time_input("Jam / Waktu Trip / Indikasi")
         
-        nama_operator = st.text_input("Nama Operator / Petugas Piket", placeholder="Masukkan nama petugas")
-
-        st.subheader("2. Identifikasi Peralatan & Bay")
-        bay_line = st.selectbox(
-            "Pilih Peralatan / Bay / Penghantar",
+        operator = st.text_input("Nama Operator / Petugas Bertugas", placeholder="Masukkan nama lengkap operator piket")
+        
+        st.subheader("2. Klasifikasi & Peralatan Terganggu")
+        bay_terganggu = st.selectbox(
+            "Pilih Bay / Penghantar / Trafo yang Gangguan",
             [
-                "Line 150kV Pangururan - Tele", 
-                "Trafo 1 30 MVA", 
-                "Feeder DT 1", 
-                "Feeder DT 2", 
-                "Busbar 150kV",
-                "PMT Bay Line",
-                "PMS Line"
+                "Line 150kV Pangururan - Tele (Line 1)",
+                "Line 150kV Pangururan - Tele (Line 2)",
+                "Trafo Daya 1 (30 MVA)",
+                "Feeder DT 1 (Dusun 1)",
+                "Feeder DT 2 (Dusun 2)",
+                "Busbar 150kV Utama",
+                "PMT Bay Interbus / Copler"
             ]
         )
         
         jenis_gangguan = st.selectbox(
-            "Jenis Gangguan / Indikasi Proteksi",
+            "Jenis Indikasi Kerja Proteksi",
             [
-                "Gangguan Temporer (Reclose Masuk)",
-                "Gangguan Permanen (Trip Sempurna)",
+                "Trip Sempurna (Gangguan Permanen)",
+                "Reclose Masuk (Gangguan Temporer / Sambaran Petir)",
                 "Trip Relay Distance (Zone 1 / 2 / 3)",
-                "Trip OCR / GFR",
-                "Anomali Thermal / Suhu Tinggi",
-                "Indikasi Gas / Buchholz Trafo",
+                "Trip OCR / GFR (Over Current / Ground Fault)",
+                "Anomali Thermal / Suhu Konektor Tinggi",
+                "Gangguan Internal Trafo (Buchholz / Overheat)",
                 "Lainnya"
             ]
         )
         
-        st.subheader("3. Kronologi & Tindakan")
-        kronologi = st.text_area("Kronologi Singkat / Catatan Tindakan", placeholder="Jelaskan kronologi kejadian dan tindakan pengamanan yang telah dilakukan...")
+        st.subheader("3. Data Arus Gangguan & Target Relay")
+        col_r1, col_r2, col_r3 = st.columns(3)
+        with col_r1:
+            arus_r = st.text_input("Arus Phasa R (A)", placeholder="Contoh: 320 A")
+        with col_r2:
+            arus_s = st.text_input("Arus Phasa S (A)", placeholder="Contoh: 315 A")
+        with col_r3:
+            arus_t = st.text_input("Arus Phasa T (A)", placeholder="Contoh: 325 A")
+            
+        jarak_ganggu = st.text_input("Estimasi Jarak Gangguan (km - khusus Saluran Transmisi)", placeholder="Contoh: 12.4 km dari GI Pangururan")
         
-        status_penyelesaian = st.selectbox(
-            "Status Pemulihan / Peralatan",
+        st.subheader("4. Kronologi, Tindakan & Catatan Operasional")
+        kronologi = st.text_area(
+            "Kronologi Singkat & Tindakan Pengamanan", 
+            placeholder="Contoh: Terjadi gangguan pada penghantar Tele, PMT trip secara otomatis, relay distance bekerja pada zone 1, dilakukan koordinasi dengan dispatcher UCC..."
+        )
+        
+        status_pemulihan = st.selectbox(
+            "Status Akhir Peralatan",
             [
-                "Peralatan Belum Normal (Dalam Penanganan)",
-                "Sudah Normal / Normal Kembali",
-                "Dalam Investigasi Tim Teknik"
+                "Peralatan Normal / Telah Disetting Masuk Kembali",
+                "Dalam Investigasi & Penanganan Tim Pemeliharaan",
+                "Peralatan Isolasi / Pemeliharaan Darurat"
             ]
         )
-
-        submitted = st.form_submit_button("Kirim & Simpan Laporan Gangguan")
+        
+        submitted = st.form_submit_button("Simpan & Kirim Laporan Gangguan")
         if submitted:
-            if not nama_operator:
-                st.warning("Mohon isi nama operator terlebih dahulu.")
+            if not operator:
+                st.warning("Mohon isi Nama Operator terlebih dahulu sebelum mengirim laporan.")
             else:
-                st.success(f"Laporan gangguan untuk {bay_line} berhasil disimpan ke sistem!")
+                st.success(f"Laporan gangguan untuk {bay_terganggu} berhasil direkam ke sistem operasional GI Pangururan!")
                 st.balloons()
 
 
