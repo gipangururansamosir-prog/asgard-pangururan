@@ -53,15 +53,14 @@ st.markdown(
 )
 
 # ==============================================================================
-# 3. MODUL HALAMAN (PENGISIAN MENU & HEALTH INDEX)
+# 3. MODUL HALAMAN (DASHBOARD & MENU LENGKAP)
 # ==============================================================================
 
 def render_dashboard():
-    # Hitung rata-rata Health Index dari berbagai parameter
     hp = st.session_state.health_params
     avg_health = int((hp["thermo_score"] + hp["gangguan_score"] + hp["anomali_score"] + hp["k3_score"]) / 4)
 
-    # Card Health Index Score Utama
+    # Health Index Score Card
     st.markdown(
         f'<div class="health-card">'
         f'<span class="health-badge">Indeks: {avg_health}% (SEHAT)</span>'
@@ -77,7 +76,7 @@ def render_dashboard():
         unsafe_allow_html=True
     )
 
-    # Header Card Status Gardu
+    # Gardu Status Card
     st.markdown(
         '<div class="user-card">'
         '<span class="status-badge">● Online</span>'
@@ -120,23 +119,65 @@ def render_dashboard():
             navigate_to("database_peralatan")
 
 
+def render_lapor_gangguan():
+    if st.button("← Kembali ke Dashboard"):
+        navigate_to("dashboard")
+    
+    st.title("⚡ Form Pelaporan Gangguan GI PANGURURAN 150 kV")
+    st.write("Silakan lengkapi form pelaporan di bawah ini.")
+    
+    with st.form("form_laporan_gangguan"):
+        st.subheader("1. Informasi Kejadian")
+        tanggal_gangguan = st.date_input("Tanggal Gangguan")
+        waktu_gangguan = st.time_input("Jam / Waktu Kejadian")
+        
+        st.subheader("2. Identifikasi Peralatan")
+        bay_line = st.selectbox(
+            "Pilih Bay / Penghantar / Trafo",
+            [
+                "Line 150kV Pangururan - Tele", 
+                "Trafo 1 30 MVA", 
+                "Feeder DT 1", 
+                "Feeder DT 2", 
+                "Busbar 150kV"
+            ]
+        )
+        
+        jenis_gangguan = st.selectbox(
+            "Jenis Gangguan / Proteksi Kerja",
+            [
+                "Gangguan Temporer (Reclose Masuk)",
+                "Gangguan Permanen (Trip Sempurna)",
+                "Indikasi PMT / Relay Proteksi",
+                "Anomali Thermal / Suhu Tinggi",
+                "Lainnya"
+            ]
+        )
+        
+        st.subheader("3. Kronologi & Keterangan")
+        keterangan = st.text_area("Kronologi Singkat / Catatan Operator", placeholder="Contoh: Terjadi trip pada penghantar... relay distance bekerja zone 1.")
+        
+        submitted = st.form_submit_button("Kirim Laporan Gangguan")
+        if submitted:
+            st.success("Laporan gangguan berhasil disimpan dan dikirim ke sistem!")
+            st.balloons()
+
+
 def render_status_gardu():
     if st.button("← Kembali ke Dashboard"):
         navigate_to("dashboard")
     st.title("⚡ Status Gardu Induk")
-    st.info("Fitur pemantauan status trafo dan penghantar secara real-time.")
+    st.info("Sistem pemantauan status peralatan secara real-time aktif.")
 
 
 def render_thermovisi():
     if st.button("← Kembali ke Dashboard"):
         navigate_to("dashboard")
     st.title("🎯 Data Thermovisi & Penyesuaian Score")
-    st.info("Setiap input suhu termal baru akan otomatis memperbarui parameter Health Index di dashboard.")
-    
     new_val = st.slider("Simulasi Skor Thermovisi", 0, 100, st.session_state.health_params["thermo_score"])
     if st.button("Simpan Skor Thermovisi"):
         st.session_state.health_params["thermo_score"] = new_val
-        st.success("Skor berhasil diperbarui! Silakan kembali ke dashboard.")
+        st.success("Skor thermovisi berhasil diperbarui!")
 
 
 # ==============================================================================
@@ -144,16 +185,13 @@ def render_thermovisi():
 # ==============================================================================
 if st.session_state.page == "dashboard":
     render_dashboard()
+elif st.session_state.page == "lapor_gangguan":
+    render_lapor_gangguan()
 elif st.session_state.page == "status_gardu":
     render_status_gardu()
 elif st.session_state.page == "thermovisi":
     render_thermovisi()
-elif st.session_state.page == "lapor_gangguan":
-    if st.button("← Kembali ke Dashboard"):
-        navigate_to("dashboard")
-    st.title("⚡ Form Pelaporan Gangguan GI PANGURURAN 150 kV")
-    st.warning("Form Pelaporan Gangguan aktif.")
 else:
     if st.button("← Kembali ke Dashboard"):
         navigate_to("dashboard")
-    st.info("Menu ini sedang dalam tahap pengembangan.")
+    st.info("Modul menu ini sedang dalam tahap pengembangan.")
