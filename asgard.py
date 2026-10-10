@@ -18,13 +18,6 @@ st.set_page_config(
 if "page" not in st.session_state:
     st.session_state.page = "dashboard"
 
-if "teks_laporan" not in st.session_state:
-    st.session_state.teks_laporan = ""
-
-if "auto_detected_leds" not in st.session_state:
-    st.session_state.auto_detected_leds = []
-
-# Mock parameter nilai kesehatan untuk simulasi Health Index
 if "health_params" not in st.session_state:
     st.session_state.health_params = {
         "thermo_score": 92,
@@ -60,7 +53,6 @@ def render_dashboard():
     hp = st.session_state.health_params
     avg_health = int((hp["thermo_score"] + hp["gangguan_score"] + hp["anomali_score"] + hp["k3_score"]) / 4)
 
-    # Health Index Score Card
     st.markdown(
         f'<div class="health-card">'
         f'<span class="health-badge">Indeks: {avg_health}% (SEHAT)</span>'
@@ -76,7 +68,6 @@ def render_dashboard():
         unsafe_allow_html=True
     )
 
-    # Gardu Status Card
     st.markdown(
         '<div class="user-card">'
         '<span class="status-badge">● Online</span>'
@@ -124,43 +115,64 @@ def render_lapor_gangguan():
         navigate_to("dashboard")
     
     st.title("⚡ Form Pelaporan Gangguan GI PANGURURAN 150 kV")
-    st.write("Silakan lengkapi form pelaporan di bawah ini.")
+    st.write("Silakan isi data laporan gangguan operasional dengan lengkap.")
     
-    with st.form("form_laporan_gangguan"):
-        st.subheader("1. Informasi Kejadian")
-        tanggal_gangguan = st.date_input("Tanggal Gangguan")
-        waktu_gangguan = st.time_input("Jam / Waktu Kejadian")
+    with st.form("form_laporan_lengkap"):
+        st.subheader("1. Waktu & Petugas")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            tgl = st.date_input("Tanggal Gangguan")
+        with col_b:
+            jam = st.time_input("Jam / Waktu Kejadian")
         
-        st.subheader("2. Identifikasi Peralatan")
+        nama_operator = st.text_input("Nama Operator / Petugas Piket", placeholder="Masukkan nama petugas")
+
+        st.subheader("2. Identifikasi Peralatan & Bay")
         bay_line = st.selectbox(
-            "Pilih Bay / Penghantar / Trafo",
+            "Pilih Peralatan / Bay / Penghantar",
             [
                 "Line 150kV Pangururan - Tele", 
                 "Trafo 1 30 MVA", 
                 "Feeder DT 1", 
                 "Feeder DT 2", 
-                "Busbar 150kV"
+                "Busbar 150kV",
+                "PMT Bay Line",
+                "PMS Line"
             ]
         )
         
         jenis_gangguan = st.selectbox(
-            "Jenis Gangguan / Proteksi Kerja",
+            "Jenis Gangguan / Indikasi Proteksi",
             [
                 "Gangguan Temporer (Reclose Masuk)",
                 "Gangguan Permanen (Trip Sempurna)",
-                "Indikasi PMT / Relay Proteksi",
+                "Trip Relay Distance (Zone 1 / 2 / 3)",
+                "Trip OCR / GFR",
                 "Anomali Thermal / Suhu Tinggi",
+                "Indikasi Gas / Buchholz Trafo",
                 "Lainnya"
             ]
         )
         
-        st.subheader("3. Kronologi & Keterangan")
-        keterangan = st.text_area("Kronologi Singkat / Catatan Operator", placeholder="Contoh: Terjadi trip pada penghantar... relay distance bekerja zone 1.")
+        st.subheader("3. Kronologi & Tindakan")
+        kronologi = st.text_area("Kronologi Singkat / Catatan Tindakan", placeholder="Jelaskan kronologi kejadian dan tindakan pengamanan yang telah dilakukan...")
         
-        submitted = st.form_submit_button("Kirim Laporan Gangguan")
+        status_penyelesaian = st.selectbox(
+            "Status Pemulihan / Peralatan",
+            [
+                "Peralatan Belum Normal (Dalam Penanganan)",
+                "Sudah Normal / Normal Kembali",
+                "Dalam Investigasi Tim Teknik"
+            ]
+        )
+
+        submitted = st.form_submit_button("Kirim & Simpan Laporan Gangguan")
         if submitted:
-            st.success("Laporan gangguan berhasil disimpan dan dikirim ke sistem!")
-            st.balloons()
+            if not nama_operator:
+                st.warning("Mohon isi nama operator terlebih dahulu.")
+            else:
+                st.success(f"Laporan gangguan untuk {bay_line} berhasil disimpan ke sistem!")
+                st.balloons()
 
 
 def render_status_gardu():
